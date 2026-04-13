@@ -1,35 +1,20 @@
-## Parent image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-## Essential enviroment variables 
-ENV PYTHONDONTWRITEBYTECODE=1 \ 
-    PYTHONNUNBUFFERED=1
-
-## Work directory inside the docker container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-## Installing system dependancies
-
-RUN apt-get update && apt-get install -y \ 
-    build-essential \ 
-    curl \ 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
-
-## Copying ur all contents from local to app 
 
 COPY . .
 
-## Run setup.py 
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -e .
 
-RUN pip install --no-cache-dir -e .
+EXPOSE 8000
 
-## Used PORTS
-
-EXPOSE 8080
-
-# Run the app
-
-CMD ["streamlit", "run", "app/app.py", "--server.port=8501", "--server.address=0.0.0.0","--server.headless=true"]
-
-
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
